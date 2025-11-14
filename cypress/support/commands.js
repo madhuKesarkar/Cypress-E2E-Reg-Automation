@@ -1,203 +1,3 @@
-// ***********************************************
-// This example commands.js shows you how to
-// create various custom commands and overwrite
-// existing commands.
-//
-// For more comprehensive examples of custom
-// commands please read more here:
-// https://on.cypress.io/custom-commands
-// ***********************************************
-//
-//
-// -- This is a parent command --
-// Cypress.Commands.add('login', (email, password) => { ... })
-//
-//
-// -- This is a child command --
-// Cypress.Commands.add('drag', { prevSubject: 'element'}, (subject, options) => { ... })
-//
-//
-// -- This is a dual command --
-// Cypress.Commands.add('dismiss', { prevSubject: 'optional'}, (subject, options) => { ... })
-//
-//
-// -- This will overwrite an existing command --
-// Cypress.Commands.overwrite('visit', (originalFn, url, options) => { ... })
-
-// /// <reference types="cypress" />
-
-// // Close the intermittent "Getting started" modal if it appears.
-// // Uses a stable selector: aria-label="Close modal"
-
-// /// <reference types="cypress" />
-
-// // Close the intermittent "Getting started" modal if it appears
-// Cypress.Commands.add('closeGettingStartedModalIfPresent', () => {
-//   cy.get('body').then($body => {
-//     const sel = 'button[aria-label="Close modal"]';
-//     if ($body.find(sel).length) {
-//       cy.log('Closing Getting Started modal');
-//       cy.get(sel).click({ force: true });
-//     }
-//   });
-// });
-
-// // Do only AUTH here (no UI assertions)
-// Cypress.Commands.add('performLogin', () => {
-//   cy.visit('/');
-//   cy.get('[data-testid="username-input"]').type(Cypress.env('username'));
-//   cy.get('[data-testid="password-input"]').type(Cypress.env('password'), { log: false });
-//   cy.get('[data-testid="sign-in-button"]').click();
-//   // Optional: wait for a cookie or an auth ping to confirm login completed
-//   // Adjust names to your app if you know them:
-//   cy.getCookie('session').should('exist'); // or a cookie your app sets when logged in
-// });
-
-
-// /// <reference types="cypress" />
-
-// // Fail-fast helper if an env var is missing/empty
-// const requireEnv = (key) => {
-//   const val = Cypress.env(key);
-//   if (!val || typeof val !== 'string' || val.trim() === '') {
-//     throw new Error(
-//       `Missing Cypress env "${key}". Set it in cypress.env.json, ` +
-//       `as CLI env (CYPRESS_${key}=...), or in cypress.config.js.`
-//     );
-//   }
-//   return val;
-// };
-
-// // Dismiss the intermittent onboarding modal if present
-// Cypress.Commands.add('closeGettingStartedModalIfPresent', () => {
-//   const sel = 'button[aria-label="Close modal"]';
-//   cy.get('body').then(($body) => {
-//     if ($body.find(sel).length) {
-//       cy.log('Closing Getting Started modal');
-//       cy.get(sel).click({ force: true });
-//     }
-//   });
-// });
-
-// // Perform authentication only (no UI assertions here)
-// Cypress.Commands.add('performLogin', () => {
-//   const username = requireEnv('username');
-//   const password = requireEnv('password');
-
-//   cy.visit('/'); // goes to baseUrl
-
-//   cy.get('[data-testid="username-input"]').should('exist').type(username);
-//   cy.get('[data-testid="password-input"]').should('exist').type(password, { log: false });
-//   cy.get('[data-testid="sign-in-button"]').click();
-
-//   // Prove login completed (use your real cookie or an API)
-//   cy.getCookie('session', { timeout: 15000 }).should('exist'); // <-- replace 'session' if different
-// });
-// **********
-// /// <reference types="cypress" />
-
-// // Ensure creds exist. If not in Cypress.env(), load cypress.env.json and set them.
-// Cypress.Commands.add('ensureCreds', () => {
-//   const u = Cypress.env('username');
-//   const p = Cypress.env('password');
-
-//   if (u && typeof u === 'string' && u.trim() && p && typeof p === 'string' && p.trim()) {
-//     return cy.wrap({ username: u, password: p }, { log: false });
-//   }
-
-//   // Fallback: read from project root
-//   return cy.readFile('cypress.env.json', { log: false }).then((obj) => {
-//     if (!obj || !obj.username || !obj.password) {
-//       throw new Error(
-//         'Could not find username/password in cypress.env.json. ' +
-//         'Add them there or pass via CLI (CYPRESS_username / CYPRESS_password).'
-//       );
-//     }
-//     // Set them into runtime env so the rest of the test can use Cypress.env(...)
-//     Cypress.env('username', obj.username);
-//     Cypress.env('password', obj.password);
-//     return { username: obj.username, password: obj.password };
-//   });
-// });
-
-// // Dismiss the intermittent onboarding modal if present
-// Cypress.Commands.add('closeGettingStartedModalIfPresent', () => {
-//   const sel = 'button[aria-label="Close modal"]';
-//   cy.get('body').then(($body) => {
-//     if ($body.find(sel).length) cy.get(sel).click({ force: true });
-//   });
-// });
-
-// // Perform authentication (no UI assertions here)
-// Cypress.Commands.add('performLogin', () => {
-//   cy.ensureCreds().then(({ username, password }) => {
-//     cy.visit('/');
-
-//     cy.get('[data-testid="username-input"]').should('exist').type(username);
-//     cy.get('[data-testid="password-input"]').should('exist').type(password, { log: false });
-//     cy.get('[data-testid="sign-in-button"]').click();
-
-//     // Replace '_bw_session' with your real auth cookie once you identify it
-//     cy.getCookie('_bw_session', { timeout: 15000 }).should('exist');
-//   });
-// });
-// /// <reference types="cypress" />
-
-// // Load creds into Cypress.env() no matter how Cypress was launched.
-// const ensureCredsSync = () => {
-//   const ok = k => typeof Cypress.env(k) === 'string' && Cypress.env(k).trim().length > 0;
-//   if (ok('username') && ok('password')) return;
-
-//   // Try reading from cypress.env.json (relative to this file)
-//   try {
-//     // support/commands.js -> project root is two levels up
-//     // eslint-disable-next-line import/no-dynamic-require, global-require
-//     const secrets = require('../../cypress.env.json');
-//     if (secrets?.username && secrets?.password) {
-//       Cypress.env('username', secrets.username);
-//       Cypress.env('password', secrets.password);
-//       return;
-//     }
-//   } catch (e) {
-//     // ignore; we'll try CLI envs next
-//   }
-
-//   // Last chance: CLI envs (CYPRESS_username/password)
-//   const u = Cypress.env('username');
-//   const p = Cypress.env('password');
-//   if (u && p) return;
-
-//   throw new Error(
-//     'Missing credentials. Create cypress.env.json with { "username": "...", "password": "..." } ' +
-//     'at the project root, or pass CLI envs CYPRESS_username / CYPRESS_password.'
-//   );
-// };
-
-// // Dismiss the intermittent onboarding modal if present
-// Cypress.Commands.add('closeGettingStartedModalIfPresent', () => {
-//   const sel = 'button[aria-label="Close modal"]';
-//   cy.get('body').then($b => {
-//     if ($b.find(sel).length) cy.get(sel).click({ force: true });
-//   });
-// });
-
-// // Perform authentication (no UI assertions here)
-// Cypress.Commands.add('performLogin', () => {
-//   ensureCredsSync();
-//   const username = Cypress.env('username');
-//   const password = Cypress.env('password');
-
-//   cy.visit('/');
-
-//   cy.get('[data-testid="username-input"]').should('exist').type(username);
-//   cy.get('[data-testid="password-input"]').should('exist').type(password, { log: false });
-//   cy.get('[data-testid="sign-in-button"]').click();
-
-//   // TODO: replace with your real auth cookie name after you identify it
-//   cy.getCookie('_bw_session', { timeout: 15000 }).should('exist');
-// });
-//****************
-
 /// <reference types="cypress" />
 
 /**
@@ -255,6 +55,22 @@ Cypress.Commands.add('login', () => {
     );
   }
 
+// Cypress.Commands.add('login', () => {
+//   // If we’re already in the app, don’t try to open the sign-in page again.
+//   cy.location('pathname', { timeout: 15000 }).then((p) => {
+//     if (p.startsWith('/billing')) return; // already authed/session cached
+//     // …otherwise do your real login…
+//     cy.visit('/sign-in');
+//     cy.get('[data-testid="username-input"]').type(Cypress.env('username'));
+//     cy.get('[data-testid="password-input"]').type(Cypress.env('password'), { log: false });
+//     cy.get('[data-testid="sign-in-button"]').click();
+//   });
+
+//   // Land on AAG to stabilize
+//   cy.visit('/billing/overview/payments', { timeout: 60000 });
+//   cy.contains('Recent payments', { timeout: 30000 }).should('have.attr', 'aria-current', 'page');
+// });
+
   // Pre-login lightweight calls (stabilize first render)
   cy.intercept('GET', '/api/v1/no_auth_flags').as('flags');
   cy.intercept('GET', '/api/v2/feature_flags/anonymous').as('anon');
@@ -296,4 +112,61 @@ Cypress.Commands.add('login', () => {
 
   // Final landing assertion
   cy.contains('At a Glance', { timeout: 45000 }).should('be.visible');
+
+Cypress.Commands.add('openActionsMenuForRow', (rowIndex = 0) => {
+  // Wait until the table and rows are visible
+  cy.get('table[role="table"] tbody tr', { timeout: 20000 })
+    .should('have.length.greaterThan', 0)
+    .eq(rowIndex)
+    .as('row');
+
+  // Scroll horizontally if the Actions column is clipped
+  cy.get('table[role="table"]').then(($table) => {
+    const scrollable = $table.parents().filter((i, el) => el.scrollWidth > el.clientWidth).first();
+    if (scrollable.length) cy.wrap(scrollable).scrollTo('right', { duration: 500 });
+  });
+
+  // Scroll the row into view and find the Actions button in its last cell
+  cy.get('@row').scrollIntoView({ offset: { top: 100, left: 0 } }).within(() => {
+    cy.get('td:last-child')
+      .find('button, [role="button"], a')
+      .contains(/^Actions$/i, { matchCase: false })
+      .should('be.visible')
+      .click({ force: true });
+  });
+
+  // Confirm the popover actually opened (portal-safe)
+  cy.get('body', { timeout: 8000 }).should(($body) => {
+    const found =
+      $body.find('[role="menu"]').length > 0 ||
+      $body.find('span,div,button,a').filter((_, el) => {
+        const t = (el.textContent || '').trim();
+        return ['View account balance', 'Log a payment', 'Send a reminder'].includes(t);
+      }).length > 0;
+    expect(found, 'Actions menu opened').to.be.true;
+  });
+});
+
+Cypress.Commands.add('clickActionsMenuItem', (label) => {
+  cy.contains('body span, body div, body button, body a, [role="menuitem"]', label, {
+    timeout: 10000,
+    matchCase: false,
+  }).should('be.visible').click({ force: true });
+});
+
+/**
+ * Fill a React-Aria DateField by label, e.g. "Earliest post date" or "Latest post date".
+ * mm, dd, yyyy are numbers.
+ */
+Cypress.Commands.add('setDateField', (labelText, { mm, dd, yyyy }) => {
+  // Find the DateField by its visible label
+  cy.contains('span, label', labelText, { matchCase: false })
+    .closest('div')                      // container that holds the date segments
+    .within(() => {
+      // React-Aria date segments are spinbuttons in order: MM, DD, YYYY
+      cy.get('[role="spinbutton"]').eq(0).clear().type(String(mm).padStart(2, '0'));
+      cy.get('[role="spinbutton"]').eq(1).clear().type(String(dd).padStart(2, '0'));
+      cy.get('[role="spinbutton"]').eq(2).clear().type(String(yyyy));
+    });
+});
 });
