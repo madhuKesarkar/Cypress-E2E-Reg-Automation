@@ -3,13 +3,54 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
+
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
+  "clean:reports": "rm -rf cypress/reports/mochawesome && mkdir -p cypress/reports/mochawesome/.jsons",
+  "cy:run": "cypress run",
+  "report:merge": "mochawesome-merge cypress/reports/mochawesome/.jsons/*.json -o cypress/reports/mochawesome/report.json",
+  "report:generate": "marge cypress/reports/mochawesome/report.json --reportDir cypress/reports/mochawesome --reportFilename report.html",
+  "report": "npm run report:merge && npm run report:generate",
+  "cy:run:report": "npm run clean:reports && npm run cy:run && npm run report"
+},
+
   "keywords": [],
   "author": "",
   "license": "ISC",
+
   "devDependencies": {
-    "cypress": "^14.0.0"
+    "cypress": "^14.0.0",
+    "cypress-mochawesome-reporter": "^4.0.2",
+    "marge": "^1.0.1",
+    "mocha-junit-reporter": "^2.2.1",
+    "mocha-multi-reporters": "^1.5.1",
+    "mochawesome-merge": "^5.0.0"
+  },
+
+  "cypress-mochawesome-reporter": {
+    "reportDir": "cypress/reports/mochawesome",
+    "charts": true,
+    "overwrite": false,
+    "html": false,
+    "json": true,
+    "reportPageTitle": "Automation Test Report",
+    "embeddedScreenshots": true,
+    "inlineAssets": true
+  },
+
+  "mocha-junit-reporter": {
+    "mochaFile": "cypress/reports/junit/results-[hash].xml",
+    "toConsole": false
+  },
+
+  "reporter": "mocha-multi-reporters",
+
+  "reporterOptions": {
+    "reporterEnabled": "cypress-mochawesome-reporter, mocha-junit-reporter",
+    "cypress-mochawesome-reporterReporterOptions": {
+      "reportDir": "cypress/reports/mochawesome"
+    },
+    "mochaJunitReporterReporterOptions": {
+      "mochaFile": "cypress/reports/junit/results-[hash].xml"
+    }
   }
 }
