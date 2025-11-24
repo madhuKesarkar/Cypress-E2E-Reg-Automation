@@ -36,6 +36,7 @@ cypress/reports/mochawesome/videos/
 
 # JUnit
 cypress/results/
+*.xml
 
 # Output files
 *.html

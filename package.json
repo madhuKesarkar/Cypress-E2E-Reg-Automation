@@ -3,20 +3,18 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
-
   "scripts": {
-  "clean:reports": "rm -rf cypress/reports/mochawesome && mkdir -p cypress/reports/mochawesome/.jsons",
-  "cy:run": "cypress run",
-  "report:merge": "mochawesome-merge cypress/reports/mochawesome/.jsons/*.json -o cypress/reports/mochawesome/report.json",
-  "report:generate": "marge cypress/reports/mochawesome/report.json --reportDir cypress/reports/mochawesome --reportFilename report.html",
-  "report": "npm run report:merge && npm run report:generate",
-  "cy:run:report": "npm run clean:reports && npm run cy:run && npm run report"
-},
-
+    "clean:reports": "rm -rf cypress/reports/mochawesome && mkdir -p cypress/reports/mochawesome/.jsons",
+    "cy:run": "cypress run",
+    "cy:run:ci": "cypress run --reporter mocha-junit-reporter --reporter-options mochaFile=cypress/results/junit-[hash].xml,toConsole=false",
+    "report:merge": "mochawesome-merge cypress/reports/mochawesome/.jsons/*.json -o cypress/reports/mochawesome/report.json",
+    "report:generate": "marge cypress/reports/mochawesome/report.json --reportDir cypress/reports/mochawesome --reportFilename report.html",
+    "report": "npm run report:merge && npm run report:generate",
+    "cy:run:report": "npm run clean:reports && npm run cy:run && npm run report"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
-
   "devDependencies": {
     "cypress": "^14.0.0",
     "cypress-mochawesome-reporter": "^4.0.2",
@@ -25,7 +23,6 @@
     "mocha-multi-reporters": "^1.5.1",
     "mochawesome-merge": "^5.0.0"
   },
-
   "cypress-mochawesome-reporter": {
     "reportDir": "cypress/reports/mochawesome",
     "charts": true,
@@ -36,14 +33,11 @@
     "embeddedScreenshots": true,
     "inlineAssets": true
   },
-
   "mocha-junit-reporter": {
     "mochaFile": "cypress/reports/junit/results-[hash].xml",
     "toConsole": false
   },
-
   "reporter": "mocha-multi-reporters",
-
   "reporterOptions": {
     "reporterEnabled": "cypress-mochawesome-reporter, mocha-junit-reporter",
     "cypress-mochawesome-reporterReporterOptions": {
