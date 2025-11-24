@@ -1,4 +1,4 @@
-<!-- # billing_QATestAutomation
+# billing_QATestAutomation
 
 End-to-end Cypress test automation for the Brightwheel **Billing** module, integrated with CircleCI.
 
@@ -76,87 +76,7 @@ JUnit XML for test results
 
 Mochawesome HTML as a build artifact (optional)
 
-TBC -->
+TBC
 
 
-# billing_QATestAutomation
 
-End-to-end Cypress test automation for the Brightwheel **Billing** module, integrated with CircleCI.
-
----
-
-## Local Test Development
-
-1. Install dependencies:
-
-```sh
-npm install
-Run the full E2E suite (headless):
-
-sh
-Copy code
-npm run cy:run
-Open Cypress in UI mode (for local debugging):
-
-sh
-Copy code
-npx cypress open
-Generate the Mochawesome HTML report after a run:
-
-sh
-Copy code
-npm run report
-Getting Started
-Node
-It’s recommended to use a version manager for Node, such as nvm.
-
-The Node version for this project is defined in .nvmrc.
-
-To activate it:
-
-sh
-Copy code
-nvm use
-Project Structure
-txt
-Copy code
-cypress/
-  e2e/                 # Test specs grouped by feature area
-  fixtures/            # Test data
-  support/
-    commands.js        # Custom Cypress commands
-    e2e.js             # Global hooks and config
-  reports/
-    mochawesome/       # Generated HTML/JSON reports (gitignored)
-  screenshots/         # Failure screenshots (gitignored)
-  videos/              # Video recordings (gitignored)
-
-cypress.config.js      # Cypress configuration
-package.json           # Scripts & dependencies
-README.md
-Reporting
-This framework generates the following:
-
-1. Mochawesome HTML report
-Location: cypress/reports/mochawesome/mochawesome.html
-
-Generate using:
-
-sh
-Copy code
-npm run report
-2. JUnit XML report (for CI)
-Location: cypress/results/junit.xml
-
-Created via mocha-junit-reporter during CI runs.
-
-All report artifacts (HTML, JSON, screenshots, videos) are ignored via .gitignore and recreated on each run.
-
-CI
-This suite is designed to run in CircleCI, including:
-
-Headless Cypress execution
-
-JUnit XML test output
-
-Optional Mochawesome HTML artifact upload
