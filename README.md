@@ -1,28 +1,32 @@
-# billing_QATestAutomation
+📦 billing_QATestAutomation
 
-End-to-end Cypress test automation for the Brightwheel **Billing** module, integrated with CircleCI.
+> End-to-end test automation for the Brightwheel QA
 
----
-
-## Local Test Development
+-------
+🚀 Local Test Development
 
 ### 1. Install dependencies
 
-```sh
+```bash
 npm install
+```
+### 2. Run the full E2E suite (headless)
 
-2. Run the full E2E suite (headless)
-   
+```bash
 npm run cy:run
+```
 
-3. Open Cypress in UI mode (for local debugging):
+### 3. Open Cypress in UI mode (for local debugging):
 
+```bash
 npx cypress open
+```
 
-4. Generate the Mochawesome HTML report after a run:
+### 4. Generate the Mochawesome HTML report after a run:
 
+```bash
 npm run report
-
+```
 
 # Getting Started
 
@@ -34,25 +38,29 @@ The current Node version for this project is defined in .nvmrc (or in package.js
 
 To enable it with nvm, run:
 
-```nvm use```
----
-```md
+```bash
+nvm use
+```
+--------
 ## Project Structure
 
+```txt
 cypress/
-e2e/ # Test specs grouped by feature area
-fixtures/ # Test data
-support/
-commands.js # Custom Cypress commands
-e2e.js # Global hooks and setup
-reports/
-mochawesome/ # HTML + JSON reports (gitignored)
-screenshots/ # Failure screenshots (gitignored)
-videos/ # Video recordings (gitignored)
+  e2e/                 # Test specs grouped by feature area
+  fixtures/            # Test data
+  support/
+    commands.js        # Custom Cypress commands
+    e2e.js             # Global hooks and setup
+  reports/
+    mochawesome/       # Generated HTML + JSON reports (gitignored)
+  screenshots/         # Failure screenshots (gitignored)
+  videos/              # Video recordings (gitignored)
 
-cypress.config.js # Cypress configuration
-package.json # Scripts & dependencies
+cypress.config.js      # Cypress configuration
+package.json           # Scripts & dependencies
 README.md
+
+```
 
 # Reporting
 
