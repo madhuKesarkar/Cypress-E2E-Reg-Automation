@@ -6,21 +6,23 @@ End-to-end Cypress test automation for the Brightwheel **Billing** module, integ
 
 ## Local Test Development
 
-1. Install dependencies:
+### 1. Install dependencies
 
-    npm install
+```sh
+npm install
 
-2. Run the full E2E suite (headless):
+2. Run the full E2E suite (headless)
    
-    npm run cy:run
+npm run cy:run
 
 3. Open Cypress in UI mode (for local debugging):
 
-    npx cypress open
+npx cypress open
 
 4. Generate the Mochawesome HTML report after a run:
 
-    npm run report
+npm run report
+
 
 # Getting Started
 
@@ -32,23 +34,24 @@ The current Node version for this project is defined in .nvmrc (or in package.js
 
 To enable it with nvm, run:
 
-nvm use
+```nvm use```
 ---
-# Project Structure
+```md
+## Project Structure
 
 cypress/
-  e2e/                 # Test specs grouped by feature area
-  fixtures/            # Test data & fixtures
-  support/
-    commands.js        # Custom Cypress commands
-    e2e.js             # Global hooks & config
-  reports/
-    mochawesome/       # Generated HTML/JSON reports (gitignored)
-  screenshots/         # Failure screenshots (gitignored)
-  videos/              # Run videos (gitignored)
+e2e/ # Test specs grouped by feature area
+fixtures/ # Test data
+support/
+commands.js # Custom Cypress commands
+e2e.js # Global hooks and setup
+reports/
+mochawesome/ # HTML + JSON reports (gitignored)
+screenshots/ # Failure screenshots (gitignored)
+videos/ # Video recordings (gitignored)
 
-cypress.config.js      # Cypress configuration
-package.json           # Scripts & dependencies
+cypress.config.js # Cypress configuration
+package.json # Scripts & dependencies
 README.md
 
 # Reporting
@@ -58,7 +61,7 @@ This framework generates:
  1. Mochawesome HTML report
 
     a. Location: cypress/reports/mochawesome/mochawesome.html
-    b. Command: npm run report
+    b. Command: ```npm run report```
 
 2. JUnit XML report (for CI)
 
