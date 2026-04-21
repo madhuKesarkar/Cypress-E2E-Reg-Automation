@@ -91,14 +91,16 @@ Cypress.Commands.add('login', () => {
     .should('be.visible')
     .type(password, { log: false });
 
+  // Register billing intercept before clicking so we don't miss the call
+  cy.intercept('GET', '/api/v2/billing/payments_summary_reports/**').as('billing');
+
   cy.get('[data-testid="sign-in-button"]').click();
 
   // First pass: try to close modal ASAP
   cy.closeGettingStartedModalIfPresent();
 
-  // Wait for a definitive dashboard call to complete
-  cy.intercept('GET', '/api/v1/dashboard/**').as('dashboard');
-  cy.wait('@dashboard', { timeout: 90000 });
+  // Wait for the billing summary call that fires after login
+  cy.wait('@billing', { timeout: 90000 });
 
   // If app kept us on a neutral path, force the intended page
   cy.location('pathname', { timeout: 45000 }).then((p) => {
@@ -112,6 +114,7 @@ Cypress.Commands.add('login', () => {
 
   // Final landing assertion
   cy.contains('At a Glance', { timeout: 45000 }).should('be.visible');
+});
 
 Cypress.Commands.add('openActionsMenuForRow', (rowIndex = 0) => {
   // Wait until the table and rows are visible
@@ -168,5 +171,4 @@ Cypress.Commands.add('setDateField', (labelText, { mm, dd, yyyy }) => {
       cy.get('[role="spinbutton"]').eq(1).clear().type(String(dd).padStart(2, '0'));
       cy.get('[role="spinbutton"]').eq(2).clear().type(String(yyyy));
     });
-});
 });

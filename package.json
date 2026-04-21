@@ -16,7 +16,8 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "cypress": "^14.0.0",
+    "@cypress/grep": "^4.1.0",
+    "cypress": "^14.5.4",
     "cypress-mochawesome-reporter": "^4.0.2",
     "marge": "^1.0.1",
     "mocha-junit-reporter": "^2.2.1",

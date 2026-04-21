@@ -1,11 +1,12 @@
 /// <reference types="cypress" />
+const { SMOKE, REGRESSION, BILLING } = require('../../support/tags')
 
 beforeEach(() => {
   cy.login();
 });
 
-describe('Unpaid Balances Tab', () => {
-  it('verifies student details under the unpaid balances tab', () => {
+describe('Unpaid Balances Tab', { tags: ['@regression', '@billing'] }, () => {
+  it('verifies student details under the unpaid balances tab', { tags: ['@smoke', '@billing'] }, () => {
     // Intercept calls related to billing data
     cy.intercept('GET', /\/api\/v2\/billing\/(overview|ledgers_reports)(\?.*)?$/).as('billing');
 
@@ -50,7 +51,7 @@ describe('Unpaid Balances Tab', () => {
   });
 
   // Navigate to a student profile and back to AAG
-  it('navigates to a student profile from unpaid balances and back to At a Glance', () => {
+  it('navigates to a student profile from unpaid balances and back to At a Glance', { tags: ['@smoke', '@regression'] }, () => {
     cy.visit('/billing/overview/unpaid');
 
     // Click on the first student name link (e.g. SF 1)
@@ -72,17 +73,9 @@ describe('Unpaid Balances Tab', () => {
     cy.contains('At a Glance', { timeout: 20000 }).should('be.visible');
   });
 
-  it("opens 'View account balance' from Actions and shows Balance summary", () => {
+  it("opens 'View account balance' from Actions and shows Balance summary", { tags: ['@regression', '@billing'] }, () => {
   // Be on the Unpaid tab
   cy.visit('/billing/overview/unpaid');
-
-  // (Optional) capture the student name from the first row to assert later
-  // const namePromise = cy
-  //   .get('table[role="table"] tbody tr')
-  //   .first()
-  //   .find('a[href*="/billing/students/"]')
-  //   .invoke('text')
-  //   .then((t) => t.trim());
 
   // Open Actions menu for the first row
   cy.get('table[role="table"] tbody tr')
@@ -102,9 +95,8 @@ describe('Unpaid Balances Tab', () => {
 
 });
 
-it("opens 'Log a payment' and shows the Payment Details modal, then returns", () => {
+it("opens 'Log a payment' and shows the Payment Details modal, then returns", { tags: ['@regression', '@billing'] }, () => {
   cy.visit('/billing/overview/unpaid');
-
   // Step 1: Open Actions for the first row
   cy.get('table[role="table"] tbody tr')
     .first()
@@ -140,7 +132,7 @@ it("opens 'Log a payment' and shows the Payment Details modal, then returns", ()
   cy.get('table[role="table"]').should('be.visible');
 });
 
-it("verifies 'Send a reminder' flow from Actions menu in Unpaid Balances table", () => {
+it("verifies 'Send a reminder' flow from Actions menu in Unpaid Balances table", { tags: ['@regression', '@billing'] }, () => {
   // Visit Unpaid Balances page
   cy.visit('/billing/overview/unpaid');
 
@@ -153,61 +145,11 @@ it("verifies 'Send a reminder' flow from Actions menu in Unpaid Balances table",
         .click({ force: true });
     });
 
-// // Click "Send a reminder" (you already do this)
-// cy.get('body').contains('span, div, button, a', 'Send a reminder', { timeout: 10000 }).click({ force: true });
-// //cy.contains(/reminder sent/i, { timeout: 20000 }).should('be.visible');
-// // Wait for the "Send" button in the reminder modal and click it
-// cy.get('button.css-1wf08ag', { timeout: 10000 })
-//   .should('be.visible')
-//   .and('contain.text', 'Send')
-//   .click({ force: true });
-
-
 // Click "Send a reminder" (you already do this)
 cy.get('body')
   .contains('span, div, button, a', 'Send a reminder', { timeout: 10000 })
   .click({ force: true });
 
-// // Wait for the reminder modal to appear
-// cy.contains('h2, h3', 'Send a reminder', { timeout: 10000 })
-//   .should('be.visible')
-//   .closest('div[role="dialog"], section[role="dialog"]')
-//   .as('reminderModal');
-
-// // Within the modal, click the "Send" button
-// cy.get('@reminderModal')
-//   .find('button')
-//   .contains(/^Send$/i)
-//   .should('be.visible')
-//   .click({ force: true });
-
-// // Verify green toast message "Reminder sent"
-// cy.contains(/reminder sent/i, { timeout: 15000 }).should('be.visible');
-
-
-// // Wait for the modal header text (retry-aware), then get the dialog element
-// cy.contains('h2, h3, [role="heading"]', /send a reminder/i, { timeout: 20000 })
-//   .should('be.visible')
-//   .closest('div[role="dialog"], section[role="dialog"]')
-//   .as('reminderDialog');
-
-// // Now assert inner content/buttons inside the dialog
-// cy.get('@reminderDialog').within(() => {
-//   cy.contains(/sending a reminder will send a text or email/i).should('be.visible');
-//   cy.contains('button', /^Cancel$/).should('be.visible');
-//   cy.contains('button', /^Send$/).should('be.visible').click({ force: true });
-// });
-
-// // Toast: "Reminder sent"
-// cy.get('body').contains(/reminder sent/i, { timeout: 20000 }).should('be.visible');
-
-// // Optional: close the modal (some UIs keep it until you close)
-// cy.get('@reminderDialog').find('button[aria-label="close modal"]').click({ force: true })
-//   .then(null, () => cy.get('body').type('{esc}', { force: true }));
-
-// // Back to unpaid table
-// cy.get('@reminderDialog').should('not.exist');
-// cy.get('table[role="table"]', { timeout: 10000 }).should('be.visible');
 })
 
 });

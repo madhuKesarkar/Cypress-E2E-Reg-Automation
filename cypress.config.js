@@ -17,17 +17,23 @@ module.exports = defineConfig({
   },
 
   e2e: {
-    // Register the reporter plugin
-    setupNodeEvents(on, config) {
-      require("cypress-mochawesome-reporter/plugin")(on);
 
-      // 👉 Add JUnit reporter
-      on('after:spec', (spec, results) => {
-        const mochaJUnit = require('mocha-junit-reporter');
-      });
+setupNodeEvents(on, config) {
+  require("cypress-mochawesome-reporter/plugin")(on);
 
-      return config;
-    },
+  on('after:spec', (spec, results) => {
+    const mochaJUnit = require('mocha-junit-reporter');
+  });
+
+  require('@cypress/grep/src/plugin')(config);
+
+  return config;
+},
+
+ env: {
+    grepFilterSpecs: true,
+    grepOmitFiltered: true,  // hides pending tests instead of showing them as skipped
+      },
 
     baseUrl: 'https://schools.sandbox.bwtest.net',
     specPattern: 'cypress/e2e/**/*.cy.{js,jsx,ts,tsx}',
