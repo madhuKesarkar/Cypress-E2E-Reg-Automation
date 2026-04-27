@@ -6,19 +6,16 @@ beforeEach(() => {
 
 describe('Unpaid Balances Tab', () => {
   it('verifies student details under the unpaid balances tab', () => {
-    // Intercept calls related to billing data
-    cy.intercept('GET', /\/api\/v2\/billing\/(overview|ledgers_reports)(\?.*)?$/).as('billing');
+    // Intercept the actual ledgers_reports call (UUID path segment + query string)
+    cy.intercept('GET', '/api/v2/billing/ledgers_reports/**').as('billing');
 
     // Navigate to unpaid balances tab
     cy.visit('/billing/overview/unpaid');
 
-    // Wait for data load (if request fires)
-    cy.wait('@billing', { timeout: 30000 }).then(
-      (interception) => {
-        expect([200, 304]).to.include(interception.response.statusCode);
-      },
-      () => {} // Continue even if cached
-    );
+    // Wait for data load
+    cy.wait('@billing', { timeout: 30000 }).then((interception) => {
+      expect([200, 304]).to.include(interception.response.statusCode);
+    });
 
     // Ensure unpaid tab is selected
     cy.get('[data-testid="billing-nav-unpaid"]').should(
@@ -27,7 +24,8 @@ describe('Unpaid Balances Tab', () => {
       'page'
     );
 
-    // Table visibility check
+    // Table visibility check — wait for at least one data row before asserting headers
+    cy.get('table[role="table"] tbody tr', { timeout: 30000 }).should('have.length.greaterThan', 0);
     cy.get('table[role="table"]').should('be.visible');
 
     // Validate column headers
@@ -51,7 +49,10 @@ describe('Unpaid Balances Tab', () => {
 
   // Navigate to a student profile and back to AAG
   it('navigates to a student profile from unpaid balances and back to At a Glance', () => {
+    cy.intercept('GET', '/api/v2/billing/ledgers_reports/**').as('billing');
     cy.visit('/billing/overview/unpaid');
+    cy.wait('@billing', { timeout: 30000 });
+    cy.get('table[role="table"] tbody tr', { timeout: 30000 }).should('have.length.greaterThan', 0);
 
     // Click on the first student name link (e.g. SF 1)
     cy.get('table[role="table"] tbody tr')
@@ -73,16 +74,10 @@ describe('Unpaid Balances Tab', () => {
   });
 
   it("opens 'View account balance' from Actions and shows Balance summary", () => {
-  // Be on the Unpaid tab
+  cy.intercept('GET', '/api/v2/billing/ledgers_reports/**').as('billing');
   cy.visit('/billing/overview/unpaid');
-
-  // (Optional) capture the student name from the first row to assert later
-  // const namePromise = cy
-  //   .get('table[role="table"] tbody tr')
-  //   .first()
-  //   .find('a[href*="/billing/students/"]')
-  //   .invoke('text')
-  //   .then((t) => t.trim());
+  cy.wait('@billing', { timeout: 30000 });
+  cy.get('table[role="table"] tbody tr', { timeout: 30000 }).should('have.length.greaterThan', 0);
 
   // Open Actions menu for the first row
   cy.get('table[role="table"] tbody tr')
@@ -103,7 +98,10 @@ describe('Unpaid Balances Tab', () => {
 });
 
 it("opens 'Log a payment' and shows the Payment Details modal, then returns", () => {
+  cy.intercept('GET', '/api/v2/billing/ledgers_reports/**').as('billing');
   cy.visit('/billing/overview/unpaid');
+  cy.wait('@billing', { timeout: 30000 });
+  cy.get('table[role="table"] tbody tr', { timeout: 30000 }).should('have.length.greaterThan', 0);
 
   // Step 1: Open Actions for the first row
   cy.get('table[role="table"] tbody tr')
@@ -141,8 +139,10 @@ it("opens 'Log a payment' and shows the Payment Details modal, then returns", ()
 });
 
 it("verifies 'Send a reminder' flow from Actions menu in Unpaid Balances table", () => {
-  // Visit Unpaid Balances page
+  cy.intercept('GET', '/api/v2/billing/ledgers_reports/**').as('billing');
   cy.visit('/billing/overview/unpaid');
+  cy.wait('@billing', { timeout: 30000 });
+  cy.get('table[role="table"] tbody tr', { timeout: 30000 }).should('have.length.greaterThan', 0);
 
   // Step 1: Open Actions for the first row
   cy.get('table[role="table"] tbody tr')

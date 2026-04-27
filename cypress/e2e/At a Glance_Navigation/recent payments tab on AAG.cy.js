@@ -1,37 +1,3 @@
-// /// <reference types="cypress" />
-
-// beforeEach(() => {
-//   cy.login(); // your existing login helper
-// });
-
-// describe('Recent payments – search & date filters', () => {
-//   it('returns rows for a student within the date range', () => {
-//     const student = 'ServiceFee Four';   // <-- put a known student here
-
-//     // Go to the Recent payments tab
-//     cy.visit('/billing/overview/payments');
-//     cy.contains('Recent payments', { timeout: 20000 }).should('have.attr', 'aria-current', 'page');
-
-//     // Intercept the server call that powers the table refresh
-//     // (use a broad pattern to be resilient across envs)
-//     cy.intercept({ method: /GET|POST/, url: '**/billing/**payments**' }).as('payments');
-
-//     // Type in the student search
-//     cy.get('input[type="search"][name="searchStudent"]', { timeout: 15000 })
-//       .should('be.visible')
-//       .clear()
-//       .type(student, { delay: 0 })
-//       .clear();
-
-//     // Earliest post date: open the visible datepicker and set a safe start (e.g., Jan 1 last year)
-
-//     cy.setDateField('Earliest post date', { mm: 11, dd: 11, yyyy: 2024 });
-//     cy.setDateField('Latest post date',   { mm: 11, dd: 11, yyyy: 2025 });
-    
-//     cy.contains('button', /^Apply$/).click();
-// });
-// });
-
 /// <reference types="cypress" />
 
 beforeEach(() => {
