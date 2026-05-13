@@ -1,0 +1,6 @@
+{
+  "baseUrl": "https://schools.sandbox.bwtest.net",
+  "envName": "sandbox",
+  "username": "REPLACE_ME",
+  "password": "REPLACE_ME"
+}
