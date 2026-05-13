@@ -3,7 +3,7 @@ const fs = require("fs");
 const path = require("path");
 
 function loadEnvConfig() {
-  const envName = process.env.CYPRESS_ENV || "sandbox"; // ✅ correct for your setup
+  const envName = process.env.CYPRESS_ENV || "sandbox"; 
   const filePath = path.resolve("cypress", "config", `${envName}.json`);
 
   if (!fs.existsSync(filePath)) {
@@ -15,9 +15,11 @@ function loadEnvConfig() {
   const fileConfig = JSON.parse(fs.readFileSync(filePath, "utf-8"));
 
   return {
-    envName,
-    ...fileConfig,
-  };
+  envName,
+  ...fileConfig,
+  username: process.env.CYPRESS_USERNAME || fileConfig.username,
+  password: process.env.CYPRESS_PASSWORD || fileConfig.password,
+};
 }
 
 const envConfig = loadEnvConfig();
