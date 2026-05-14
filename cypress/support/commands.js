@@ -81,13 +81,11 @@ Cypress.Commands.add('login', () => {
     {
       cacheAcrossSpecs: true,
       validate() {
-        // If the restored session is stale, this returns 403/401 and
-        // cy.session() will re-run the setup to create a fresh login
-        cy.request({
-          url: '/billing/overview/unpaid',
-          failOnStatusCode: false,
-        }).its('status').should('eq', 200);
-      },
+        const envName = Cypress.env('envName') || 'sandbox';
+        const cookieName = `_brightwheel_v2_${envName}-brightwheel`;
+
+          cy.getCookie(cookieName).should('exist');
+        },
     },
   );
 

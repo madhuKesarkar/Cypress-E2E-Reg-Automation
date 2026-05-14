@@ -41,7 +41,7 @@ module.exports = defineConfig({
     baseUrl: process.env.CYPRESS_BASE_URL || envConfig.baseUrl,
 
   setupNodeEvents(on, config) {
-  require("cypress-mochawesome-reporter/plugin")(on);
+    require("cypress-mochawesome-reporter/plugin")(on);
 
   on("before:browser:launch", (browser, launchOptions) => {
     if (browser.family === "chromium") {
@@ -51,6 +51,7 @@ module.exports = defineConfig({
         "--user-agent=Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
       );
     }
+
     return launchOptions;
   });
 
