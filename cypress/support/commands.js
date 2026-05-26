@@ -45,6 +45,60 @@ Cypress.Commands.add('closeGettingStartedModalIfPresent', () => {
  * After submit, waits for dashboard API, closes modal (if any),
  * and asserts the “At a Glance” landing text.
  */
+// Cypress.Commands.add('login', () => {
+//   const username = Cypress.env('username');
+//   const password = Cypress.env('password');
+
+//   if (!username || !password) {
+//     throw new Error(
+//       'Missing credentials. Add "username" and "password" to cypress.env.json at the project root.',
+//     );
+//   }
+
+//   // Pre-login lightweight calls (stabilize first render)
+//   cy.intercept('GET', '/api/v1/no_auth_flags').as('flags');
+//   cy.intercept('GET', '/api/v2/feature_flags/anonymous').as('anon');
+
+//   // Hit sign-in directly and ask app to land on the billing overview
+//   cy.visit('/sign-in?redirect_path=/billing/overview/unpaid', {
+//     timeout: 180000,
+//     failOnStatusCode: false,
+//   });
+
+//   cy.wait(['@flags', '@anon'], { timeout: 120000 });
+
+//   cy.get('[data-testid="username-input"]', { timeout: 60000 })
+//     .should('be.visible')
+//     .type(username);
+
+//   cy.get('[data-testid="password-input"]')
+//     .should('be.visible')
+//     .type(password, { log: false });
+
+//   cy.get('[data-testid="sign-in-button"]').click();
+
+//   // First pass: try to close modal ASAP
+//   cy.closeGettingStartedModalIfPresent();
+
+//   // Wait for a definitive dashboard call to complete
+//   //cy.intercept('GET', '/api/v1/dashboard/**').as('dashboard');
+//   //cy.wait('@dashboard', { timeout: 90000 });
+//   cy.url({ timeout: 90000 }).should('not.include', '/sign-in');
+//   cy.contains('Billing', { timeout: 45000 }).should('be.visible');
+
+//   // If app kept us on a neutral path, force the intended page
+//   cy.location('pathname', { timeout: 45000 }).then((p) => {
+//     if (p === '/' || p === '/sign-in') {
+//       cy.visit('/billing/overview/unpaid', { timeout: 90000 });
+//     }
+//   });
+
+//   // Late-mount safety: try to close modal again
+//   cy.closeGettingStartedModalIfPresent();
+
+//   // Final landing assertion
+//   cy.contains('At a Glance', { timeout: 45000 }).should('be.visible');
+
 Cypress.Commands.add('login', () => {
   const username = Cypress.env('username');
   const password = Cypress.env('password');
@@ -55,63 +109,55 @@ Cypress.Commands.add('login', () => {
     );
   }
 
-// Cypress.Commands.add('login', () => {
-//   // If we’re already in the app, don’t try to open the sign-in page again.
-//   cy.location('pathname', { timeout: 15000 }).then((p) => {
-//     if (p.startsWith('/billing')) return; // already authed/session cached
-//     // …otherwise do your real login…
-//     cy.visit('/sign-in');
-//     cy.get('[data-testid="username-input"]').type(Cypress.env('username'));
-//     cy.get('[data-testid="password-input"]').type(Cypress.env('password'), { log: false });
-//     cy.get('[data-testid="sign-in-button"]').click();
-//   });
-
-//   // Land on AAG to stabilize
-//   cy.visit('/billing/overview/payments', { timeout: 60000 });
-//   cy.contains('Recent payments', { timeout: 30000 }).should('have.attr', 'aria-current', 'page');
-// });
-
-  // Pre-login lightweight calls (stabilize first render)
+  // Pre-login lightweight calls
   cy.intercept('GET', '/api/v1/no_auth_flags').as('flags');
   cy.intercept('GET', '/api/v2/feature_flags/anonymous').as('anon');
 
-  // Hit sign-in directly and ask app to land on the billing overview
+  // Open sign-in page
   cy.visit('/sign-in?redirect_path=/billing/overview/unpaid', {
     timeout: 180000,
     failOnStatusCode: false,
   });
 
+  // Wait for initial API calls
   cy.wait(['@flags', '@anon'], { timeout: 120000 });
 
+  // Enter username
   cy.get('[data-testid="username-input"]', { timeout: 60000 })
     .should('be.visible')
+    .clear()
     .type(username);
 
+  // Enter password
   cy.get('[data-testid="password-input"]')
     .should('be.visible')
+    .clear()
     .type(password, { log: false });
 
-  cy.get('[data-testid="sign-in-button"]').click();
+  // Click sign in
+  cy.get('[data-testid="sign-in-button"]')
+    .should('be.visible')
+    .click();
 
-  // First pass: try to close modal ASAP
+  // Verify login completed
+  cy.url({ timeout: 90000 }).should('not.include', '/sign-in');
+
+  // Close modal if present
   cy.closeGettingStartedModalIfPresent();
 
-  // Wait for a definitive dashboard call to complete
-  cy.intercept('GET', '/api/v1/dashboard/**').as('dashboard');
-  cy.wait('@dashboard', { timeout: 90000 });
-
-  // If app kept us on a neutral path, force the intended page
-  cy.location('pathname', { timeout: 45000 }).then((p) => {
-    if (p === '/' || p === '/sign-in') {
-      cy.visit('/billing/overview/unpaid', { timeout: 90000 });
-    }
+  // Navigate to billing overview
+  cy.visit('/billing/overview/unpaid', {
+    timeout: 90000,
+    failOnStatusCode: false,
   });
 
-  // Late-mount safety: try to close modal again
-  cy.closeGettingStartedModalIfPresent();
-
   // Final landing assertion
-  cy.contains('At a Glance', { timeout: 45000 }).should('be.visible');
+  cy.contains('At a Glance', { timeout: 45000 })
+    .should('be.visible');
+
+  // Close modal again if it appears later
+  cy.closeGettingStartedModalIfPresent();
+});
 
 Cypress.Commands.add('openActionsMenuForRow', (rowIndex = 0) => {
   // Wait until the table and rows are visible
@@ -168,5 +214,4 @@ Cypress.Commands.add('setDateField', (labelText, { mm, dd, yyyy }) => {
       cy.get('[role="spinbutton"]').eq(1).clear().type(String(dd).padStart(2, '0'));
       cy.get('[role="spinbutton"]').eq(2).clear().type(String(yyyy));
     });
-});
 });
