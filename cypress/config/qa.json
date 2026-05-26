@@ -1,0 +1,6 @@
+{
+  "baseUrl": "https://schools.qa.bwtest.net/billing/overview/unpaid",
+  "envName": "qa",
+  "username": "REPLACE_ME",
+  "password": "REPLACE_ME"
+}
