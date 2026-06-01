@@ -6,7 +6,7 @@ beforeEach(() => {
 });
 
 describe('Unpaid Balances Tab', { tags: ['@regression', '@billing'] }, () => {
-  it('verifies student details under the unpaid balances tab', { tags: ['@smoke', '@billing'] }, () => {
+  it('verifies student details under the unpaid balances tab', { tags:'@smoke' }, () => {
     // Intercept calls related to billing data
     cy.intercept('GET', /\/api\/v2\/billing\/(overview|ledgers_reports)(\?.*)?$/).as('billing');
 
@@ -51,7 +51,7 @@ describe('Unpaid Balances Tab', { tags: ['@regression', '@billing'] }, () => {
   });
 
   // Navigate to a student profile and back to AAG
-  it('navigates to a student profile from unpaid balances and back to At a Glance', { tags: ['@smoke', '@regression'] }, () => {
+  it('navigates to a student profile from unpaid balances and back to At a Glance', { tags: '@smoke' }, () => {
     cy.visit('/billing/overview/unpaid');
 
     // Click on the first student name link (e.g. SF 1)
@@ -73,7 +73,7 @@ describe('Unpaid Balances Tab', { tags: ['@regression', '@billing'] }, () => {
     cy.contains('At a Glance', { timeout: 20000 }).should('be.visible');
   });
 
-  it("opens 'View account balance' from Actions and shows Balance summary", { tags: ['@regression', '@billing'] }, () => {
+  it("opens 'View account balance' from Actions and shows Balance summary", () => {
   // Be on the Unpaid tab
   cy.visit('/billing/overview/unpaid');
 
@@ -95,7 +95,7 @@ describe('Unpaid Balances Tab', { tags: ['@regression', '@billing'] }, () => {
 
 });
 
-it("opens 'Log a payment' and shows the Payment Details modal, then returns", { tags: ['@regression', '@billing'] }, () => {
+it("opens 'Log a payment' and shows the Payment Details modal, then returns", () => {
   cy.visit('/billing/overview/unpaid');
   // Step 1: Open Actions for the first row
   cy.get('table[role="table"] tbody tr')
@@ -132,7 +132,7 @@ it("opens 'Log a payment' and shows the Payment Details modal, then returns", { 
   cy.get('table[role="table"]').should('be.visible');
 });
 
-it("verifies 'Send a reminder' flow from Actions menu in Unpaid Balances table", { tags: ['@regression', '@billing'] }, () => {
+it("verifies 'Send a reminder' flow from Actions menu in Unpaid Balances table", { tags: '@smoke' }, () => {
   // Visit Unpaid Balances page
   cy.visit('/billing/overview/unpaid');
 

@@ -100,7 +100,7 @@ Cypress.Commands.add('login', () => {
   cy.closeGettingStartedModalIfPresent();
 
   // Wait for the billing summary call that fires after login
-  cy.wait('@billing', { timeout: 90000 });
+  cy.wait('@billing', { timeout: 60000 });
 
   // If app kept us on a neutral path, force the intended page
   cy.location('pathname', { timeout: 45000 }).then((p) => {
