@@ -1,4 +1,4 @@
-📦 billing_QATestAutomation
+📦 QATestAutomation
 
 > End-to-end test automation for the Brightwheel QA
 
