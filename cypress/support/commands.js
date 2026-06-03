@@ -34,9 +34,8 @@ Cypress.Commands.add('closeGettingStartedModalIfPresent', () => {
   return loop(attempts);
 });
 
-// Uses cy.session() so the sign-in page is only visited ONCE per run.
-// All subsequent beforeEach calls restore the cached cookies/localStorage
-// without touching /sign-in, which prevents PerimeterX from triggering.
+// 
+
 Cypress.Commands.add('login', () => {
   const username = Cypress.env('username');
   const password = Cypress.env('password');
@@ -48,7 +47,6 @@ Cypress.Commands.add('login', () => {
   }
 
   cy.session(
-    // Include baseUrl so QA and sandbox sessions are stored separately
     [username, Cypress.config('baseUrl')],
     () => {
       cy.intercept('GET', '/api/v1/no_auth_flags').as('flags');
@@ -63,18 +61,19 @@ Cypress.Commands.add('login', () => {
 
       cy.get('[data-testid="username-input"]', { timeout: 60000 })
         .should('be.visible')
+        .clear()
         .type(username);
 
       cy.get('[data-testid="password-input"]')
         .should('be.visible')
+        .clear()
         .type(password, { log: false });
 
-      cy.get('[data-testid="sign-in-button"]').click();
+      cy.get('[data-testid="sign-in-button"]')
+        .should('be.visible')
+        .click();
 
-      cy.closeGettingStartedModalIfPresent();
-
-      cy.intercept('GET', '/api/v2/billing/payments_summary_reports/**').as('dashboard');
-      cy.wait('@dashboard', { timeout: 90000 });
+      cy.url({ timeout: 90000 }).should('not.include', '/sign-in');
 
       cy.closeGettingStartedModalIfPresent();
     },
@@ -84,12 +83,11 @@ Cypress.Commands.add('login', () => {
         const envName = Cypress.env('envName') || 'sandbox';
         const cookieName = `_brightwheel_v2_${envName}-brightwheel`;
 
-          cy.getCookie(cookieName).should('exist');
-        },
+        cy.getCookie(cookieName).should('exist');
+      },
     },
   );
 
-  // Session restored or created — navigate to the billing page without hitting sign-in
   cy.visit('/billing/overview/unpaid', { timeout: 90000 });
   cy.contains('At a Glance', { timeout: 45000 }).should('be.visible');
 });
