@@ -14,8 +14,8 @@ describe('At a Glance Page Tests', () => {
     cy.contains('Payments in last 35 days', { timeout: 20000 }).should('be.visible');
   });
 
-  it('verifies activity last 35 days section', () => {
-    cy.contains('Activity last 35 days', { timeout: 20000 }).scrollIntoView().should('be.visible');
+  it('verifies Spotlight section', () => {
+    cy.contains('Spotlight', { timeout: 20000 }).should('be.visible');
   });
 
   it('navigates to Subsidies tab', () => {

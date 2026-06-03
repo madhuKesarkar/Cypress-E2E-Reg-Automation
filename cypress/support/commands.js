@@ -1,10 +1,5 @@
 /// <reference types="cypress" />
 
-/**
- * Robust closer for the intermittent “Getting started” modal.
- * Polls for the close button and clicks as soon as it appears,
- * then verifies the dialog is gone. Safe if the modal never shows.
- */
 Cypress.Commands.add('closeGettingStartedModalIfPresent', () => {
   const candidates = [
     'button[aria-label="Close modal"]',
@@ -19,12 +14,11 @@ Cypress.Commands.add('closeGettingStartedModalIfPresent', () => {
         const btn = doc.querySelector(sel);
         if (btn) {
           cy.wrap(btn).click({ force: true });
-          return cy.wait(300); // allow close animation
+          return cy.wait(300);
         }
       }
     });
 
-  // Poll up to ~8s (16 x 500ms) without failing if nothing to close
   const attempts = 16;
   const loop = (n) =>
     clickIfPresent().then(() =>
@@ -40,11 +34,8 @@ Cypress.Commands.add('closeGettingStartedModalIfPresent', () => {
   return loop(attempts);
 });
 
-/**
- * Log in using creds from cypress.env.json (project root).
- * After submit, waits for dashboard API, closes modal (if any),
- * and asserts the “At a Glance” landing text.
- */
+// 
+
 Cypress.Commands.add('login', () => {
   const username = Cypress.env('username');
   const password = Cypress.env('password');
@@ -55,81 +46,63 @@ Cypress.Commands.add('login', () => {
     );
   }
 
-// Cypress.Commands.add('login', () => {
-//   // If we’re already in the app, don’t try to open the sign-in page again.
-//   cy.location('pathname', { timeout: 15000 }).then((p) => {
-//     if (p.startsWith('/billing')) return; // already authed/session cached
-//     // …otherwise do your real login…
-//     cy.visit('/sign-in');
-//     cy.get('[data-testid="username-input"]').type(Cypress.env('username'));
-//     cy.get('[data-testid="password-input"]').type(Cypress.env('password'), { log: false });
-//     cy.get('[data-testid="sign-in-button"]').click();
-//   });
+  cy.session(
+    [username, Cypress.config('baseUrl')],
+    () => {
+      cy.intercept('GET', '/api/v1/no_auth_flags').as('flags');
+      cy.intercept('GET', '/api/v2/feature_flags/anonymous').as('anon');
 
-//   // Land on AAG to stabilize
-//   cy.visit('/billing/overview/payments', { timeout: 60000 });
-//   cy.contains('Recent payments', { timeout: 30000 }).should('have.attr', 'aria-current', 'page');
-// });
+      cy.visit('/sign-in?redirect_path=/billing/overview/unpaid', {
+        timeout: 180000,
+        failOnStatusCode: false,
+      });
 
-  // Pre-login lightweight calls (stabilize first render)
-  cy.intercept('GET', '/api/v1/no_auth_flags').as('flags');
-  cy.intercept('GET', '/api/v2/feature_flags/anonymous').as('anon');
+      cy.wait(['@flags', '@anon'], { timeout: 120000 });
 
-  // Hit sign-in directly and ask app to land on the billing overview
-  cy.visit('/sign-in?redirect_path=/billing/overview/unpaid', {
-    timeout: 180000,
-    failOnStatusCode: false,
-  });
+      cy.get('[data-testid="username-input"]', { timeout: 60000 })
+        .should('be.visible')
+        .clear()
+        .type(username);
 
-  cy.wait(['@flags', '@anon'], { timeout: 120000 });
+      cy.get('[data-testid="password-input"]')
+        .should('be.visible')
+        .clear()
+        .type(password, { log: false });
 
-  cy.get('[data-testid="username-input"]', { timeout: 60000 })
-    .should('be.visible')
-    .type(username);
+      cy.get('[data-testid="sign-in-button"]')
+        .should('be.visible')
+        .click();
 
-  cy.get('[data-testid="password-input"]')
-    .should('be.visible')
-    .type(password, { log: false });
+      cy.url({ timeout: 90000 }).should('not.include', '/sign-in');
 
-  // Register billing intercept before clicking so we don't miss the call
-  cy.intercept('GET', '/api/v2/billing/payments_summary_reports/**').as('billing');
+      cy.closeGettingStartedModalIfPresent();
+    },
+    {
+      cacheAcrossSpecs: true,
+      validate() {
+        const envName = Cypress.env('envName') || 'sandbox';
+        const cookieName = `_brightwheel_v2_${envName}-brightwheel`;
 
-  cy.get('[data-testid="sign-in-button"]').click();
+        cy.getCookie(cookieName).should('exist');
+      },
+    },
+  );
 
-  // First pass: try to close modal ASAP
-  cy.closeGettingStartedModalIfPresent();
-
-  // Wait for the billing summary call that fires after login
-  cy.wait('@billing', { timeout: 60000 });
-
-  // If app kept us on a neutral path, force the intended page
-  cy.location('pathname', { timeout: 45000 }).then((p) => {
-    if (p === '/' || p === '/sign-in') {
-      cy.visit('/billing/overview/unpaid', { timeout: 90000 });
-    }
-  });
-
-  // Late-mount safety: try to close modal again
-  cy.closeGettingStartedModalIfPresent();
-
-  // Final landing assertion
+  cy.visit('/billing/overview/unpaid', { timeout: 90000 });
   cy.contains('At a Glance', { timeout: 45000 }).should('be.visible');
 });
 
 Cypress.Commands.add('openActionsMenuForRow', (rowIndex = 0) => {
-  // Wait until the table and rows are visible
   cy.get('table[role="table"] tbody tr', { timeout: 20000 })
     .should('have.length.greaterThan', 0)
     .eq(rowIndex)
     .as('row');
 
-  // Scroll horizontally if the Actions column is clipped
   cy.get('table[role="table"]').then(($table) => {
-    const scrollable = $table.parents().filter((i, el) => el.scrollWidth > el.clientWidth).first();
+    const scrollable = $table.parents().filter((_i, el) => el.scrollWidth > el.clientWidth).first();
     if (scrollable.length) cy.wrap(scrollable).scrollTo('right', { duration: 500 });
   });
 
-  // Scroll the row into view and find the Actions button in its last cell
   cy.get('@row').scrollIntoView({ offset: { top: 100, left: 0 } }).within(() => {
     cy.get('td:last-child')
       .find('button, [role="button"], a')
@@ -138,7 +111,6 @@ Cypress.Commands.add('openActionsMenuForRow', (rowIndex = 0) => {
       .click({ force: true });
   });
 
-  // Confirm the popover actually opened (portal-safe)
   cy.get('body', { timeout: 8000 }).should(($body) => {
     const found =
       $body.find('[role="menu"]').length > 0 ||
@@ -157,16 +129,10 @@ Cypress.Commands.add('clickActionsMenuItem', (label) => {
   }).should('be.visible').click({ force: true });
 });
 
-/**
- * Fill a React-Aria DateField by label, e.g. "Earliest post date" or "Latest post date".
- * mm, dd, yyyy are numbers.
- */
 Cypress.Commands.add('setDateField', (labelText, { mm, dd, yyyy }) => {
-  // Find the DateField by its visible label
   cy.contains('span, label', labelText, { matchCase: false })
-    .closest('div')                      // container that holds the date segments
+    .closest('div')
     .within(() => {
-      // React-Aria date segments are spinbuttons in order: MM, DD, YYYY
       cy.get('[role="spinbutton"]').eq(0).clear().type(String(mm).padStart(2, '0'));
       cy.get('[role="spinbutton"]').eq(1).clear().type(String(dd).padStart(2, '0'));
       cy.get('[role="spinbutton"]').eq(2).clear().type(String(yyyy));

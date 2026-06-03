@@ -1,6 +1,6 @@
-📦 billing_QATestAutomation
+📦 QATestAutomation
 
-> End-to-end test automation for the Brightwheel QA
+> End-to-end Cypress test automation for the Brightwheel QA
 
 -------
 🚀 Local Test Development

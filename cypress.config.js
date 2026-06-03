@@ -1,8 +1,30 @@
-// cypress.config.js
-const { defineConfig } = require('cypress');
+const { defineConfig } = require("cypress");
+const fs = require("fs");
+const path = require("path");
+
+function loadEnvConfig() {
+  const envName = process.env.CYPRESS_ENV || "sandbox"; 
+  const filePath = path.resolve("cypress", "config", `${envName}.json`);
+
+  if (!fs.existsSync(filePath)) {
+    throw new Error(
+      `Missing config file: ${filePath}. Valid envs: sandbox, qa`
+    );
+  }
+
+  const fileConfig = JSON.parse(fs.readFileSync(filePath, "utf-8"));
+
+  return {
+  envName,
+  ...fileConfig,
+  username: process.env.CYPRESS_USERNAME || fileConfig.username,
+  password: process.env.CYPRESS_PASSWORD || fileConfig.password,
+};
+}
+
+const envConfig = loadEnvConfig();
 
 module.exports = defineConfig({
-  // Add the mochawesome reporter here
   reporter: "cypress-mochawesome-reporter",
   reporterOptions: {
     reportDir: "cypress/reports/mochawesome",
@@ -12,20 +34,38 @@ module.exports = defineConfig({
     json: true,
     reportFilename: "mochawesome",
     saveAllAttempts: false,
-  // IMPORTANT: force JSONs to .jsons folder
-    outputDir: "cypress/reports/mochawesome/.jsons"
+    outputDir: "cypress/reports/mochawesome/.jsons",
   },
 
   e2e: {
+    baseUrl: process.env.CYPRESS_BASE_URL || envConfig.baseUrl,
 
-setupNodeEvents(on, config) {
-  require("cypress-mochawesome-reporter/plugin")(on);
+  setupNodeEvents(on, config) {
+    require("cypress-mochawesome-reporter/plugin")(on);
 
   on('after:spec', (spec, results) => {
     const mochaJUnit = require('mocha-junit-reporter');
   });
 
   require('@cypress/grep/src/plugin')(config);
+  on("before:browser:launch", (browser, launchOptions) => {
+    if (browser.family === "chromium") {
+      launchOptions.args.push("--disable-blink-features=AutomationControlled");
+      launchOptions.args.push("--disable-infobars");
+      launchOptions.args.push(
+        "--user-agent=Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
+      );
+    }
+
+    return launchOptions;
+  });
+
+  config.env = {
+    ...config.env,
+    ...envConfig,
+    username: process.env.CYPRESS_USERNAME || envConfig.username,
+    password: process.env.CYPRESS_PASSWORD || envConfig.password,
+  };
 
   return config;
 },
@@ -35,9 +75,16 @@ setupNodeEvents(on, config) {
     grepOmitFiltered: true,  // hides pending tests instead of showing them as skipped
       },
 
-    baseUrl: 'https://schools.sandbox.bwtest.net',
-    specPattern: 'cypress/e2e/**/*.cy.{js,jsx,ts,tsx}',
-    supportFile: 'cypress/support/e2e.js',
+    specPattern: "cypress/e2e/**/*.cy.{js,jsx,ts,tsx}",
+    supportFile: "cypress/support/e2e.js",
+
+    // Block PerimeterX domains so the bot-detection challenge never loads
+    blockHosts: [
+      "*.perimeterx.net",
+      "*.perimeterx.com",
+      "*.px-cloud.net",
+      "*.px-client.net",
+    ],
 
     pageLoadTimeout: 180000,
     defaultCommandTimeout: 20000,
@@ -46,7 +93,6 @@ setupNodeEvents(on, config) {
     retries: { runMode: 2, openMode: 1 },
   },
 
-  // recordings
   video: true,
-  videosFolder: 'cypress/videos',
+  videosFolder: "cypress/videos",
 });
