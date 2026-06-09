@@ -43,6 +43,11 @@ module.exports = defineConfig({
   setupNodeEvents(on, config) {
     require("cypress-mochawesome-reporter/plugin")(on);
 
+  on('after:spec', (spec, results) => {
+    const mochaJUnit = require('mocha-junit-reporter');
+  });
+
+  require('@cypress/grep/src/plugin')(config);
   on("before:browser:launch", (browser, launchOptions) => {
     if (browser.family === "chromium") {
       launchOptions.args.push("--disable-blink-features=AutomationControlled");
@@ -64,6 +69,11 @@ module.exports = defineConfig({
 
   return config;
 },
+
+ env: {
+    grepFilterSpecs: true,
+    grepOmitFiltered: true,  // hides pending tests instead of showing them as skipped
+      },
 
     specPattern: "cypress/e2e/**/*.cy.{js,jsx,ts,tsx}",
     supportFile: "cypress/support/e2e.js",

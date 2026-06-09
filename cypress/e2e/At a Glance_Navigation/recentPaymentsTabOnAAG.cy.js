@@ -11,6 +11,7 @@ const setSpinDate = (label, mm, dd, yy2) => {
     cy.get('[role="spinbutton"]').eq(1).clear().type(dd).type('{enter}').blur(); // day
     cy.get('[role="spinbutton"]').eq(2).clear().type(yy2).type('{enter}').blur(); // 2-digit year
   });
+  
   // close any popover so Apply is clickable
   cy.get('body').click(0, 0);
 };
