@@ -33,9 +33,7 @@ Cypress.Commands.add('closeGettingStartedModalIfPresent', () => {
 
   return loop(attempts);
 });
-
-// 
-
+ 
 Cypress.Commands.add('login', () => {
   const username = Cypress.env('username');
   const password = Cypress.env('password');
@@ -46,50 +44,54 @@ Cypress.Commands.add('login', () => {
     );
   }
 
-  cy.session(
-    [username, Cypress.config('baseUrl')],
-    () => {
-      cy.intercept('GET', '/api/v1/no_auth_flags').as('flags');
-      cy.intercept('GET', '/api/v2/feature_flags/anonymous').as('anon');
+  // Pre-login lightweight calls
+  cy.intercept('GET', '/api/v1/no_auth_flags').as('flags');
+  cy.intercept('GET', '/api/v2/feature_flags/anonymous').as('anon');
 
-      cy.visit('/sign-in?redirect_path=/billing/overview/unpaid', {
-        timeout: 180000,
-        failOnStatusCode: false,
-      });
+  // Open sign-in page
+  cy.visit('/sign-in?redirect_path=/billing/overview/unpaid', {
+    timeout: 180000,
+    failOnStatusCode: false,
+  });
 
-      cy.wait(['@flags', '@anon'], { timeout: 120000 });
+  // Wait for initial API calls
+  cy.wait(['@flags', '@anon'], { timeout: 120000 });
 
+  // Enter username
       cy.get('[data-testid="username-input"]', { timeout: 60000 })
         .should('be.visible')
         .clear()
         .type(username);
 
+  // Enter password
       cy.get('[data-testid="password-input"]')
         .should('be.visible')
-        .clear()
+    .clear()
         .type(password, { log: false });
 
-      cy.get('[data-testid="sign-in-button"]')
-        .should('be.visible')
-        .click();
+  // Click sign in
+  cy.get('[data-testid="sign-in-button"]')
+    .should('be.visible')
+    .click();
 
-      cy.url({ timeout: 90000 }).should('not.include', '/sign-in');
+  // Verify login completed
+  cy.url({ timeout: 90000 }).should('not.include', '/sign-in');
 
-      cy.closeGettingStartedModalIfPresent();
-    },
-    {
-      cacheAcrossSpecs: true,
-      validate() {
-        const envName = Cypress.env('envName') || 'sandbox';
-        const cookieName = `_brightwheel_v2_${envName}-brightwheel`;
+  // Close modal if present
+  cy.closeGettingStartedModalIfPresent();
 
-        cy.getCookie(cookieName).should('exist');
-      },
-    },
-  );
+  // Navigate to billing overview
+  cy.visit('/billing/overview/unpaid', {
+    timeout: 90000,
+    failOnStatusCode: false,
+  });
 
-  cy.visit('/billing/overview/unpaid', { timeout: 90000 });
-  cy.contains('At a Glance', { timeout: 45000 }).should('be.visible');
+  // Final landing assertion
+  cy.contains('At a Glance', { timeout: 45000 })
+    .should('be.visible');
+
+  // Close modal again if it appears later
+  cy.closeGettingStartedModalIfPresent();
 });
 
 Cypress.Commands.add('openActionsMenuForRow', (rowIndex = 0) => {
