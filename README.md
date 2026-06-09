@@ -1,6 +1,6 @@
-📦 billing_QATestAutomation
+📦 QATestAutomation
 
-> End-to-end test automation for the Brightwheel QA
+> End-to-end Cypress test automation for the Brightwheel QA
 
 -------
 🚀 Local Test Development
@@ -89,5 +89,16 @@ Mochawesome HTML as a build artifact (optional)
 
 TBC
 
+## Tagging Rules
+
+### Mandatory Tags
+- One suite tag: @smoke / @regression
+- One module tag: @billing / @payments
+
+### Optional Tags
+- @critical / @high
+
+### Example
+it('should create invoice', { tags: ['@smoke', '@billing', '@critical'] })
 
 

@@ -34,6 +34,7 @@ Cypress.Commands.add('closeGettingStartedModalIfPresent', () => {
   return loop(attempts);
 });
 
+
 Cypress.Commands.add('login', () => {
   const username = Cypress.env('username');
   const password = Cypress.env('password');
@@ -60,13 +61,13 @@ Cypress.Commands.add('login', () => {
   // Enter username
       cy.get('[data-testid="username-input"]', { timeout: 60000 })
         .should('be.visible')
-    .clear()
+        .clear()
         .type(username);
 
   // Enter password
       cy.get('[data-testid="password-input"]')
         .should('be.visible')
-    .clear()
+        .clear()
         .type(password, { log: false });
 
   // Click sign in
