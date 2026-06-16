@@ -33,7 +33,7 @@ module.exports = defineConfig({
     html: false,
     json: true,
     reportFilename: "mochawesome",
-    saveAllAttempts: false,
+    saveAllAttempts: true,
     outputDir: "cypress/reports/mochawesome/.jsons",
   },
 
@@ -43,9 +43,9 @@ module.exports = defineConfig({
   setupNodeEvents(on, config) {
     require("cypress-mochawesome-reporter/plugin")(on);
 
-  on('after:spec', (spec, results) => {
-    const mochaJUnit = require('mocha-junit-reporter');
-  });
+  // on('after:spec', (spec, results) => {
+  //   const mochaJUnit = require('mocha-junit-reporter');
+  // });
 
   require('@cypress/grep/src/plugin')(config);
   on("before:browser:launch", (browser, launchOptions) => {
@@ -86,11 +86,11 @@ module.exports = defineConfig({
       "*.px-client.net",
     ],
 
-    pageLoadTimeout: 180000,
-    defaultCommandTimeout: 20000,
-    requestTimeout: 30000,
+    pageLoadTimeout: 60000,
+    defaultCommandTimeout: 4000,
+    requestTimeout: 5000,
     responseTimeout: 30000,
-    retries: { runMode: 2, openMode: 1 },
+    retries: { runMode: 2, openMode: 0 },
   },
 
   video: true,
