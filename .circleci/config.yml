@@ -1,0 +1,116 @@
+version: 2.1
+
+parameters:
+  node-version:
+    type: string
+    default: "21.7.3"
+
+commands:
+  install-deps:
+    steps:
+      - restore_cache:
+          keys:
+            - npm-deps-v1-{{ checksum "package-lock.json" }}
+            - npm-deps-v1-
+      - run:
+          name: Install dependencies
+          command: npm ci
+      - save_cache:
+          key: npm-deps-v1-{{ checksum "package-lock.json" }}
+          paths:
+            - node_modules
+
+  store-cypress-artifacts:
+    steps:
+      - store_artifacts:
+          path: cypress/reports
+          destination: cypress-reports
+      - store_artifacts:
+          path: cypress/videos
+          destination: cypress-videos
+      - store_artifacts:
+          path: cypress/screenshots
+          destination: cypress-screenshots
+
+executors:
+  cypress-node:
+    docker:
+      - image: cypress/browsers:22.14.0-chrome-136.0.7103.92-1
+    resource_class: medium
+    working_directory: ~/repo
+
+jobs:
+  e2e-sandbox:
+    executor: cypress-node
+    parallelism: 4
+    environment:
+      CYPRESS_ENV: sandbox
+    steps:
+      - checkout
+      - install-deps
+      - run:
+          name: Run Cypress specs (sandbox)
+          command: |
+            SPECS=$(circleci tests glob "cypress/e2e/**/*.cy.{js,jsx,ts,tsx}" \
+              | circleci tests split --split-by=timings --timings-type=filename \
+              | tr '\n' ',')
+            echo "Specs assigned to this container: $SPECS"
+            npx cypress run \
+              --spec "$SPECS" \
+              --reporter cypress-mochawesome-reporter \
+              --reporter-options "reportDir=cypress/reports/mochawesome,overwrite=false,html=false,json=true,saveAllAttempts=true"
+          environment:
+            CYPRESS_USERNAME: $CYPRESS_SANDBOX_USERNAME
+            CYPRESS_PASSWORD: $CYPRESS_SANDBOX_PASSWORD
+            CYPRESS_BASE_URL: $CYPRESS_SANDBOX_BASE_URL
+      - store-cypress-artifacts
+
+  e2e-qa:
+    executor: cypress-node
+    parallelism: 4
+    environment:
+      CYPRESS_ENV: qa
+    steps:
+      - checkout
+      - install-deps
+      - run:
+          name: Run Cypress specs (qa)
+          command: |
+            SPECS=$(circleci tests glob "cypress/e2e/**/*.cy.{js,jsx,ts,tsx}" \
+              | circleci tests split --split-by=timings --timings-type=filename \
+              | tr '\n' ',')
+            echo "Specs assigned to this container: $SPECS"
+            npx cypress run \
+              --spec "$SPECS" \
+              --reporter cypress-mochawesome-reporter \
+              --reporter-options "reportDir=cypress/reports/mochawesome,overwrite=false,html=false,json=true,saveAllAttempts=true"
+          environment:
+            CYPRESS_USERNAME: $CYPRESS_QA_USERNAME
+            CYPRESS_PASSWORD: $CYPRESS_QA_PASSWORD
+            CYPRESS_BASE_URL: $CYPRESS_QA_BASE_URL
+      - store-cypress-artifacts
+
+workflows:
+  on-push:
+    jobs:
+      - e2e-sandbox:
+          context: cypress-e2e
+          filters:
+            branches:
+              ignore:
+                - main
+
+  on-merge:
+    jobs:
+      - e2e-sandbox:
+          context: cypress-e2e
+          filters:
+            branches:
+              only: main
+      - e2e-qa:
+          context: cypress-e2e
+          requires:
+            - e2e-sandbox
+          filters:
+            branches:
+              only: main
