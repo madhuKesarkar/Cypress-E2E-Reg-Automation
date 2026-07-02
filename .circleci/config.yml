@@ -35,7 +35,7 @@ commands:
 executors:
   cypress-node:
     docker:
-      - image: cypress/browsers:22.14.0-chrome-136.0.7103.92-1
+      - image: cypress/browsers:node-24.15.0-chrome-148.0.7778.96-1-ff-150.0.3-edge-148.0.3967.54-1
     resource_class: medium
     working_directory: ~/repo
 
