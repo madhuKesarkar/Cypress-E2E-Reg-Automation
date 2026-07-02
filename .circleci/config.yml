@@ -51,6 +51,9 @@ jobs:
       - run:
           name: Run Cypress specs (sandbox)
           command: |
+            export CYPRESS_BASE_URL=$CYPRESS_SANDBOX_BASE_URL
+            export CYPRESS_USERNAME=$CYPRESS_SANDBOX_USERNAME
+            export CYPRESS_PASSWORD=$CYPRESS_SANDBOX_PASSWORD
             SPECS=$(circleci tests glob "cypress/e2e/**/*.cy.{js,jsx,ts,tsx}" \
               | circleci tests split --split-by=timings --timings-type=filename \
               | tr '\n' ',')
@@ -59,12 +62,8 @@ jobs:
               --spec "$SPECS" \
               --reporter cypress-mochawesome-reporter \
               --reporter-options "reportDir=cypress/reports/mochawesome,overwrite=false,html=false,json=true,saveAllAttempts=true"
-          environment:
-            CYPRESS_USERNAME: $CYPRESS_SANDBOX_USERNAME
-            CYPRESS_PASSWORD: $CYPRESS_SANDBOX_PASSWORD
-            CYPRESS_BASE_URL: $CYPRESS_SANDBOX_BASE_URL
       - store-cypress-artifacts
-
+      
   e2e-qa:
     executor: cypress-node
     parallelism: 4
@@ -76,6 +75,9 @@ jobs:
       - run:
           name: Run Cypress specs (qa)
           command: |
+            export CYPRESS_BASE_URL=$CYPRESS_QA_BASE_URL
+            export CYPRESS_USERNAME=$CYPRESS_QA_USERNAME
+            export CYPRESS_PASSWORD=$CYPRESS_QA_PASSWORD
             SPECS=$(circleci tests glob "cypress/e2e/**/*.cy.{js,jsx,ts,tsx}" \
               | circleci tests split --split-by=timings --timings-type=filename \
               | tr '\n' ',')
@@ -84,10 +86,6 @@ jobs:
               --spec "$SPECS" \
               --reporter cypress-mochawesome-reporter \
               --reporter-options "reportDir=cypress/reports/mochawesome,overwrite=false,html=false,json=true,saveAllAttempts=true"
-          environment:
-            CYPRESS_USERNAME: $CYPRESS_QA_USERNAME
-            CYPRESS_PASSWORD: $CYPRESS_QA_PASSWORD
-            CYPRESS_BASE_URL: $CYPRESS_QA_BASE_URL
       - store-cypress-artifacts
 
 workflows:
