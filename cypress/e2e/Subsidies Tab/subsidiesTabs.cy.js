@@ -1,44 +1,25 @@
 /// <reference types="cypress" />
 
+/**
+ * subsidiesTabs.cy.js — refactored with SubsidiesPage POM
+ */
+const SubsidiesPage = require('../../pages/SubsidiesPage');
+
 describe('Subsidies Upcoming Invoices Page', { tags: ['@regression', '@billing'] }, () => {
+
   beforeEach(() => {
     cy.login();
-
-    cy.intercept('GET', '**/api/v2/billing/subsidy_agencies*').as('subsidyAgencies');
-
-    cy.visit('/billing/subsidies/all-agencies');
-
-    cy.wait('@subsidyAgencies');
-
-    cy.contains('h1', 'Subsidies')
-      .should('be.visible');
+    SubsidiesPage.open();
   });
 
   it('should validate upcoming invoices page for an agency', { tags: '@smoke' }, () => {
-    cy.contains('a', /Automation/i)
-      .should('be.visible')
-      .click();
+    SubsidiesPage.clickAgencyByName(/Automation/i);
+    cy.url().should('include', '/billing/subsidies/').and('include', '/transactions');
 
-    cy.url()
-      .should('include', '/billing/subsidies/')
-      .and('include', '/transactions');
+    SubsidiesPage.goToUpcomingInvoices();
+    SubsidiesPage.assertUpcomingInvoicesLoaded();
 
-    cy.contains('a', 'Upcoming invoices')
-      .should('be.visible')
-      .click();
-
-    cy.url()
-      .should('include', '/upcoming');
-
-    cy.contains('h3', 'Upcoming invoices that will post soon')
-      .should('exist');
-
-    cy.contains('Showing a set of upcoming invoices for each bill plan')
-      .should('exist');
-
-    cy.contains('button', 'Select an action')
-      .should('be.visible');
-
+    // Table headers
     cy.contains('th', 'Student').should('exist');
     cy.contains('th', 'Invoice').should('exist');
     cy.contains('th', 'Bill plan name').should('exist');
@@ -47,106 +28,57 @@ describe('Subsidies Upcoming Invoices Page', { tags: ['@regression', '@billing']
     cy.contains('th', 'Amount').should('exist');
     cy.contains('th', 'Balance').should('exist');
 
-    cy.contains(/No invoices found based on your search/i)
-      .should('exist');
+    cy.contains('button', 'Select an action').should('be.visible');
+    cy.contains(/No invoices found based on your search/i).should('exist');
   });
 
   it('should validate agency info tab and edit agency modal', { tags: '@smoke' }, () => {
-    cy.contains('a', /Automation/i)
-      .should('be.visible')
-      .click();
+    SubsidiesPage.clickAgencyByName(/Automation/i);
 
-    cy.contains('a', 'Agency info')
-      .should('be.visible')
-      .click();
+    SubsidiesPage.goToAgencyInfo();
+    SubsidiesPage.assertAgencyInfoLoaded();
 
-    cy.url()
-      .should('include', '/info');
-
-    cy.contains('Agency contact info')
-      .should('exist');
-
-    cy.contains('Agency name').should('exist');
-    cy.contains('Agency contact').should('exist');
-    cy.contains('Agency email').should('exist');
-    cy.contains('Phone number').should('exist');
-    cy.contains('Address line 1').should('exist');
-    cy.contains('City').should('exist');
-    cy.contains('State').should('exist');
-    cy.contains('Zip code').should('exist');
-
+    // Open edit modal and close
     cy.contains('button', 'Edit agency')
       .should('be.visible')
       .and('not.be.disabled')
       .click();
 
-    cy.contains(/Agency Information/i)
-      .should('exist');
+    cy.contains(/Agency Information/i).should('exist');
+    SubsidiesPage.street1Input.should('exist');
 
-    cy.get('input[name="street_1"]')
-      .should('exist');
-
-    cy.get('button[aria-label="close modal"]')
-      .should('be.visible')
-      .click();
-
-    cy.contains(/Agency Information/i)
-      .should('not.exist');
+    SubsidiesPage.closeModal();
+    cy.contains(/Agency Information/i).should('not.exist');
   });
 
   it('should validate students tab and add students modal', { tags: '@smoke' }, () => {
-    let selectedAgencyName;
-
+    // Capture agency name before clicking
     cy.contains('a', /Automation/i)
       .should('be.visible')
       .invoke('text')
       .then((text) => {
-        selectedAgencyName = text.trim();
+        const selectedAgencyName = text.trim();
+        cy.contains('a', selectedAgencyName).should('be.visible').click();
 
-        cy.contains('a', selectedAgencyName)
+        cy.url().should('include', '/billing/subsidies/');
+        cy.contains('h1', /Automation/i).should('exist');
+
+        SubsidiesPage.goToStudentsTab();
+
+        // Open and close add students modal
+        SubsidiesPage.addStudentsTabBtn
           .should('be.visible')
+          .and('be.enabled')
           .click();
+
+        cy.contains(/^Add students to/i).should('exist');
+        cy.contains(/^Select students who will receive funds from/i).should('exist');
+
+        SubsidiesPage.closeModalBtn.first().click({ force: true });
+
+        SubsidiesPage.assertStudentsTabLoaded();
+        cy.contains(/^Add students to/i).should('not.exist');
+        cy.url().should('include', '/students');
       });
-
-    cy.url()
-      .should('include', '/billing/subsidies/');
-
-    cy.contains('h1', /Automation/i)
-      .should('exist');
-
-    cy.get('[data-testid="billing-nav-students"]')
-      .should('be.visible')
-      .and('not.have.attr', 'aria-disabled', 'true')
-      .click();
-
-    cy.url()
-      .should('include', '/students');
-
-    cy.contains('button', 'Add students')
-      .should('be.visible')
-      .and('be.enabled')
-      .click();
-
-    cy.contains(/^Add students to/i)
-      .should('exist');
-
-    cy.contains(/^Select students who will receive funds from/i)
-      .should('exist');
-
-    cy.get('button[aria-label="close modal"]')
-      .first()
-      .should('exist')
-      .click({ force: true });
-
-    cy.contains('th', 'Student').should('exist');
-    cy.contains('th', 'Rooms').should('exist');
-    cy.contains('th', 'Open invoices').should('exist');
-    cy.contains('th', 'On bill plan?').should('exist');
-
-    cy.contains(/^Add students to/i)
-      .should('not.exist');
-
-    cy.url()
-      .should('include', '/students');
   });
 });
