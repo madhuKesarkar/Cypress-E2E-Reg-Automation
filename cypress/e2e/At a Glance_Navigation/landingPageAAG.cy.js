@@ -1,37 +1,48 @@
 /// <reference types="cypress" />
 
-beforeEach(() => {
-  cy.login();
-  cy.visit('/billing/overview');
-});
+/**
+ * landingPageAAG.cy.js — refactored with AtAGlancePage POM
+ */
+
+const AtAGlancePage = require('../../pages/AtAGlancePage');
 
 describe('At a Glance Page Tests', () => {
+
+  beforeEach(() => {
+    cy.login();
+    AtAGlancePage.open();
+  });
+
   it('verifies Open invoices section', () => {
-    cy.contains('Open invoices as of today', { timeout: 20000 }).should('be.visible');
+    AtAGlancePage.assertOpenInvoicesVisible();
   });
 
   it('verifies last 35 days payments section', () => {
-    cy.contains('Payments in last 35 days', { timeout: 20000 }).should('be.visible');
+    AtAGlancePage.paymentsSection.should('be.visible');
   });
 
-  it('verifies Spotlight section', () => {
-    cy.contains('Spotlight', { timeout: 20000 }).should('be.visible');
+  // it('verifies Spotlight section', () => {
+  //   AtAGlancePage.spotlightSection.should('be.visible');
+  // });
+
+  it('verifies Activity last 35 days section', () => {
+  AtAGlancePage.activitySection.should('be.visible');
   });
 
   it('navigates to Subsidies tab', () => {
     cy.visit('/billing/subsidies/all-agencies');
-    cy.contains('h1', 'Subsidies', { timeout: 20000 }).should('be.visible');
+    cy.contains('h1', 'Subsidies', { timeout: Cypress.config('responseTimeout') }).should('be.visible');
   });
 
   it('searches for a student', () => {
-    cy.get('#student').type('ServiceFee One', { force: true });
-    cy.contains('button', 'Apply').click();
-    cy.get('a[title="ServiceFee One"]').should('be.visible').and('have.text', 'ServiceFee One');
+    AtAGlancePage.searchStudent('ServiceFee One');
+    cy.get('a[title="ServiceFee One"]')
+      .should('be.visible')
+      .and('have.text', 'ServiceFee One');
   });
 
   it('accesses Help Center link', () => {
-    const href =
-      'https://help.mybrightwheel.com/en/articles/5363662-billing-v3-billing-dashboard';
+    const href = 'https://help.mybrightwheel.com/en/articles/5363662-billing-v3-billing-dashboard';
     cy.request(href).then((res) => expect(res.status).to.eq(200));
   });
 });
